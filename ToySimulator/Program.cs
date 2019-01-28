@@ -14,12 +14,10 @@ namespace ToySimulator
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            var services = InitializationDI();
-            var robot = new Robot();
-            var table = new SquareTabletop(5);
-            var driver = new DriverRobotToy(robot, table);
+            var services = InitializationDI(5);
 
             var parse = services.GetService<IParseServices>();
+            var driver = services.GetService<IDriverToy>();
 
             while (true)
             {
@@ -42,11 +40,11 @@ namespace ToySimulator
             }            
         }
 
-        private static ServiceProvider InitializationDI()
+        private static ServiceProvider InitializationDI(int size)
         {
             var serviceProvider = new ServiceCollection()
                                        .AddTransient<IToy, Robot>()
-                                       .AddTransient<ITabletop, SquareTabletop>()
+                                       .AddTransient<ITabletop>(t => new SquareTabletop(size))
                                        .AddTransient<IDriverToy, DriverRobotToy>()
                                        .AddTransient<IParseServices, ParseServices>()
                                        .BuildServiceProvider();
