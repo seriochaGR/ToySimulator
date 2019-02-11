@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Autofac;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using ToySimulator.App_Start;
 using ToySimulator.Commands.Parser;
 using ToySimulator.Driver;
 using ToySimulator.Enums;
@@ -14,44 +16,36 @@ namespace ToySimulator
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            var services = InitializationDI(5);
 
-            var parse = services.GetService<IParseServices>();
-            var driver = services.GetService<IDriverToy>();
+            var container = ContainerConfig.Configure(5);
 
-            while (true)
+            using (var scope = container.BeginLifetimeScope())
             {
-                string line = PromptForCommand();
-                if (line.ToUpper() == "EXIT" || line.ToUpper() == "QUIT")
-                {
-                    Environment.Exit(0);
-                }
-                var command = parse.GetInstruction(line);
+                var parse = scope.Resolve<IParseServices>();
+                var driver = scope.Resolve<IDriverToy>();
 
-                if (command.Instruction != Instruction.Invalid)
+                while (true)
                 {
-                    var simulator = new Simulator();
-                    simulator.Execute(driver, command);
+                    string line = PromptForCommand();
+                    if (line.ToUpper() == "EXIT" || line.ToUpper() == "QUIT")
+                    {
+                        Environment.Exit(0);
+                    }
+                    var command = parse.GetInstruction(line);
+
+                    if (command.Instruction != Instruction.Invalid)
+                    {
+                        var simulator = new Simulator();
+                        simulator.Execute(driver, command);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid command");
+                    }
                 }
-                else
-                {
-                    Console.WriteLine("Invalid command");
-                }
-            }            
+            }                      
         }
-
-        private static ServiceProvider InitializationDI(int size)
-        {
-            var serviceProvider = new ServiceCollection()
-                                       .AddTransient<IToy, Robot>()
-                                       .AddTransient<ITabletop>(t => new SquareTabletop(size))
-                                       .AddTransient<IDriverToy, DriverRobotToy>()
-                                       .AddTransient<IParseServices, ParseServices>()
-                                       .BuildServiceProvider();
-
-            return serviceProvider;
-        }
-
+       
         private static string PromptForCommand()
         {
             Console.WriteLine("#: ");

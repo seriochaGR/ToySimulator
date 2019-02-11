@@ -8,14 +8,6 @@ namespace ToySimulator.Toys.Robots
     public class Robot : Toy, IToy
     {
         private const int step = 1;
-                
-        public void Place(int x, int y, Orientation facing)
-        {
-            xPosition = x;
-            yPosition = y;
-            this.facing = facing;
-            isPlaced = true;
-        }
 
         public bool XMovement(int direction)
         {
@@ -60,16 +52,7 @@ namespace ToySimulator.Toys.Robots
 
             return false;
         }
-
-        public string Report()
-        {
-            if (isPlaced)
-            {
-                return String.Format("{0},{1},{2}", xPosition, yPosition, facing.ToString().ToUpper());
-            }
-            return null;
-        }
-
+        
         public int GetXPosition()
         {
             return xPosition;
